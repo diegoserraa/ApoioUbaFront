@@ -14,7 +14,7 @@ function App() {
   useEffect(() => {
     const fetchPontos = async () => {
       try {
-        const res = await fetch("http://localhost:3000/pontos");
+        const res = await fetch("https://apoioubaback.onrender.com/pontos");
         const data = await res.json();
         setPontos(data.filter(p => p.latitude && p.longitude));
       } catch (error) {
