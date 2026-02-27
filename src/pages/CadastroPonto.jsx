@@ -23,6 +23,7 @@ CadastroPonto() {
   const [form, setForm] = useState({
     nome: "",
     endereco: "",
+    tipo:"",
     numero: "",
     bairro: "",
     cep: "",
@@ -72,6 +73,7 @@ CadastroPonto() {
     if (
       !form.nome ||
       !form.endereco ||
+      !form.tipo ||
       !form.numero ||
       !form.telefone ||
       !horarios.inicio ||
@@ -94,7 +96,7 @@ CadastroPonto() {
 
     try {
       const res = await fetch(
-        "https://apoioubaback.onrender.com/pontos",
+        `${import.meta.env.VITE_API_URL}/pontos`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -113,6 +115,7 @@ CadastroPonto() {
       setForm({
         nome: "",
         endereco: "",
+        tipo:"",
         numero: "",
         bairro: "",
         cep: "",
@@ -155,6 +158,22 @@ CadastroPonto() {
           Cadastro de Ponto de Coleta
         </Typography>
 
+<TextField
+  fullWidth
+  label="Tipo"
+  name="tipo"
+  value={form.tipo}
+  onChange={handleChange}
+  size="small"
+  select
+  SelectProps={{ native: true }}
+  sx={{ mb: 2 }}
+>
+  
+  <option value="doacao">Ponto de Doação</option>
+  <option value="abrigo">Abrigo</option>
+  <option value="comida">Alimentação</option>
+</TextField>
         <TextField
           fullWidth
           label="Nome do Local"

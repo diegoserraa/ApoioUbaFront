@@ -1,57 +1,98 @@
-import React from "react";
+import React, { useState } from "react";
 import { Box, Grid, Typography, Paper } from "@mui/material";
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
-import MedicalServicesIcon from "@mui/icons-material/MedicalServices";
-import SecurityIcon from "@mui/icons-material/Security";
-import EmergencyIcon from "@mui/icons-material/Emergency";
+import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import HomeIcon from "@mui/icons-material/Home";
 
-const numeros = [
-  { nome: "Bombeiro", numero: "193", color: "#d32f2f", icon: LocalFireDepartmentIcon },
-  { nome: "SAMU", numero: "192", color: "#1976d2", icon: MedicalServicesIcon },
-  { nome: "Polícia Militar", numero: "190", color: "#388e3c", icon: SecurityIcon },
-  { nome: "Defesa Civil", numero: "199", color: "#f57c00", icon: EmergencyIcon },
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+
+const opcoes = [
+  {
+    nome: "Onde Doar",
+    tipo: "doacao",
+    color: "#1976d2",
+    icon: VolunteerActivismIcon,
+  },
+  {
+    nome: "Alimentação",
+    tipo: "comida",
+    color: "#2e7d32",
+    icon: RestaurantIcon,
+  },
+  {
+    nome: "Abrigos",
+    tipo: "abrigo",
+    color: "#f57c00",
+    icon: HomeIcon,
+  },
+  {
+    nome: "Entregas",
+    tipo: "entrega",
+    color: "#c62828",
+    icon: LocalShippingIcon,
+  },
 ];
 
-const SupportNumbers = () => {
+const SupportNumbers = ({ onChange }) => {
+  const [selecionado, setSelecionado] = useState(opcoes[0].nome);
+
+  const handleSelect = (item) => {
+    setSelecionado(item.nome);
+    console.log("Tipo selecionado:", item.tipo); // 👈 TESTE AQUI
+    if (onChange) onChange(item.tipo);
+  };
+
   return (
     <Box sx={{ py: 2, width: "100%", backgroundColor: "#e3f2fd" }}>
       <Typography
         variant="subtitle1"
         align="center"
-        sx={{ fontWeight: 700, mb: 2, fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' } }}
+        sx={{
+          fontWeight: 700,
+          mb: 2,
+          fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
+        }}
       >
-        Números de Emergência
+        Central de Apoio
       </Typography>
 
       <Grid
         container
-        spacing={4} // aumenta o espaço entre linhas
-        justifyContent="center" // centraliza os cards horizontalmente
+        spacing={4}
+        justifyContent="center"
         sx={{
           width: "100%",
           px: { xs: 2, sm: 4 },
-          gap: "32px", // aumenta o espaço entre os cards horizontalmente
+          gap: "32px",
         }}
       >
-        {numeros.map((item, index) => {
+        {opcoes.map((item, index) => {
           const IconComponent = item.icon;
+          const isSelected = selecionado === item.nome;
+
           return (
             <Grid key={index} item xs="auto">
               <Paper
+                onClick={() => handleSelect(item)}
                 sx={{
-                  width: 120,       // largura do card
-                  height: 120,      // altura do card
+                  width: 140,
+                  height: 130,
                   p: 1.5,
                   textAlign: "center",
                   borderRadius: 2,
-                  border: "1px solid #cfd8dc",
+                  cursor: "pointer",
+                  border: isSelected
+                    ? `2px solid ${item.color}`
+                    : "1px solid #cfd8dc",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
                   alignItems: "center",
-                  background: "#fff",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                  transition: "transform 0.3s, box-shadow 0.3s",
+                  background: isSelected ? "#f5faff" : "#fff",
+                  boxShadow: isSelected
+                    ? "0 6px 18px rgba(0,0,0,0.15)"
+                    : "0 2px 8px rgba(0,0,0,0.06)",
+                  transition: "all 0.3s ease",
                   "&:hover": {
                     transform: "translateY(-3px)",
                     boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
@@ -75,17 +116,15 @@ const SupportNumbers = () => {
                 >
                   <IconComponent fontSize="inherit" />
                 </Box>
+
                 <Typography
                   variant="subtitle2"
-                  sx={{ fontWeight: 700, mb: 0.3, fontSize: { xs: '0.7rem', sm: '0.75rem', md: '0.8rem' } }}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: "0.7rem", sm: "0.75rem", md: "0.85rem" },
+                  }}
                 >
                   {item.nome}
-                </Typography>
-                <Typography
-                  variant="subtitle1"
-                  sx={{ fontWeight: 700, color: item.color, fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' } }}
-                >
-                  {item.numero}
                 </Typography>
               </Paper>
             </Grid>

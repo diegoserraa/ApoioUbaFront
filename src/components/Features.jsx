@@ -4,20 +4,20 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Ícone vermelho
-const redIcon = new L.Icon({
-  iconUrl:
-    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
+// 🔥 Função para criar ícone dinâmico
+const criarIcone = (cor) =>
+  new L.Icon({
+    iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${cor}.png`,
+    shadowUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+  });
 
-const Features = ({ pontos }) => {
-  if (!pontos || pontos.length === 0) return null;
+const Features = ({ pontos = [], cor }) => {
+  if (!pontos.length) return null;
 
   const center = [
     parseFloat(pontos[0].latitude),
@@ -29,13 +29,13 @@ const Features = ({ pontos }) => {
       sx={{
         width: "100%",
         backgroundColor: "#f5f7fa",
-        py: 5, // 🔥 mesma distância top e bottom
-        px: { xs: 2, md: "2.5%" }, // 🔥 mais perto da borda no desktop
+        py: 5,
+        px: { xs: 2, md: "2.5%" },
       }}
     >
       <Box
         sx={{
-          height: { xs: 340, md: 370 }, // levemente menor
+          height: { xs: 340, md: 370 },
           width: "100%",
           borderRadius: 3,
           overflow: "hidden",
@@ -60,14 +60,17 @@ const Features = ({ pontos }) => {
                 parseFloat(ponto.latitude),
                 parseFloat(ponto.longitude),
               ]}
-              icon={redIcon}
+              icon={criarIcone(cor?.marker || "red")}
             >
               <Popup>
                 <strong>{ponto.nome}</strong>
                 <br />
                 {ponto.endereco}, {ponto.bairro}
                 <br />
-                Itens: {ponto.itens_recebidos.join(", ")}
+                Itens:{" "}
+                {Array.isArray(ponto.itens_recebidos)
+                  ? ponto.itens_recebidos.join(", ")
+                  : "Não se aplica"}
                 <br />
                 Horário: {ponto.horario}
                 <br />

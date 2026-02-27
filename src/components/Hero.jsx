@@ -82,25 +82,6 @@ const Hero = () => {
           itens são mais necessários.
         </Typography>
 
-        <Button
-          variant="contained"
-          href="#support-points"
-          sx={{
-            bgcolor: "#000", // 🔥 botão preto
-            fontWeight: 700,
-            px: 3,
-            py: 1,
-            fontSize: { xs: "0.85rem", sm: "0.9rem" },
-            boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
-            "&:hover": {
-              bgcolor: "#111",
-              transform: "translateY(-2px)",
-              boxShadow: "0 6px 18px rgba(0,0,0,0.5)",
-            },
-          }}
-        >
-          Ver pontos de coleta
-        </Button>
       </Box>
     </Box>
   );
