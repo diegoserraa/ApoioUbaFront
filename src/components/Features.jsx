@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Box } from "@mui/material";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// 🔥 Função para criar ícone dinâmico
+// 🔥 Criar ícone dinâmico
 const criarIcone = (cor) =>
   new L.Icon({
     iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${cor}.png`,
@@ -17,9 +17,29 @@ const criarIcone = (cor) =>
   });
 
 const Features = ({ pontos = [], cor }) => {
+  const [userLocation, setUserLocation] = useState(null);
+  const [markerSelecionado, setMarkerSelecionado] = useState(null);
+
+  const isMobile = window.innerWidth < 768;
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+        },
+        () => {
+          console.log("Localização não permitida.");
+        }
+      );
+    }
+  }, []);
+
   if (!pontos.length) return null;
 
-  // 🔥 Filtra apenas pontos válidos
   const pontosValidos = pontos.filter(
     (p) =>
       p.latitude &&
@@ -28,12 +48,24 @@ const Features = ({ pontos = [], cor }) => {
       !isNaN(parseFloat(p.longitude))
   );
 
-  if (!pontosValidos.length) return null; // evita quebrar mapa
+  if (!pontosValidos.length) return null;
 
   const center = [
     parseFloat(pontosValidos[0].latitude),
     parseFloat(pontosValidos[0].longitude),
   ];
+
+  const abrirNavegacao = (lat, lng) => {
+    let url = "";
+
+    if (userLocation) {
+      url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}&travelmode=driving`;
+    } else {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    }
+
+    window.open(url, "_blank");
+  };
 
   return (
     <Box
@@ -64,31 +96,65 @@ const Features = ({ pontos = [], cor }) => {
             attribution="&copy; OpenStreetMap contributors"
           />
 
-          {pontosValidos.map((ponto) => (
-            <Marker
-              key={ponto.id}
-              position={[
-                parseFloat(ponto.latitude),
-                parseFloat(ponto.longitude),
-              ]}
-              icon={criarIcone(cor?.marker || "red")}
-            >
-              <Popup>
-                <strong>{ponto.nome}</strong>
-                <br />
-                {ponto.endereco}, {ponto.bairro}
-                <br />
-                Itens:{" "}
-                {Array.isArray(ponto.itens_recebidos)
-                  ? ponto.itens_recebidos.join(", ")
-                  : "Não se aplica"}
-                <br />
-                Horário: {ponto.horario}
-                <br />
-                Telefone: {ponto.telefone}
-              </Popup>
-            </Marker>
-          ))}
+          {pontosValidos.map((ponto) => {
+            const lat = parseFloat(ponto.latitude);
+            const lng = parseFloat(ponto.longitude);
+            const markerRef = useRef(null);
+
+            return (
+              <Marker
+                key={ponto.id}
+                position={[lat, lng]}
+                icon={criarIcone(cor?.marker || "red")}
+                ref={markerRef}
+                eventHandlers={{
+                  mouseover: () => {
+                    if (!isMobile) {
+                      markerRef.current?.openPopup();
+                    }
+                  },
+                  mouseout: () => {
+                    if (!isMobile) {
+                      markerRef.current?.closePopup();
+                    }
+                  },
+                  click: () => {
+                    if (isMobile) {
+                      // 📱 MOBILE
+                      if (markerSelecionado !== ponto.id) {
+                        setMarkerSelecionado(ponto.id);
+                        markerRef.current?.openPopup();
+                      } else {
+                        abrirNavegacao(lat, lng);
+                      }
+                    } else {
+                      // 💻 DESKTOP
+                      abrirNavegacao(lat, lng);
+                    }
+                  },
+                }}
+              >
+                <Popup
+                  autoClose={false}
+                  closeOnClick={false}
+                  onClose={() => setMarkerSelecionado(null)}
+                >
+                  <strong>{ponto.nome}</strong>
+                  <br />
+                  {ponto.endereco}, {ponto.bairro}
+                  <br />
+                  Itens:{" "}
+                  {Array.isArray(ponto.itens_recebidos)
+                    ? ponto.itens_recebidos.join(", ")
+                    : "Não se aplica"}
+                  <br />
+                  Horário: {ponto.horario}
+                  <br />
+                  Telefone: {ponto.telefone}
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </Box>
     </Box>
