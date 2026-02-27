@@ -84,7 +84,6 @@ CadastroPonto() {
       !form.endereco ||
       !form.tipo ||
       !form.numero ||
-      !form.telefone ||
       !horarios.inicio ||
       !horarios.fim
     ) {
