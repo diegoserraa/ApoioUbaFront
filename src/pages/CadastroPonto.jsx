@@ -78,68 +78,93 @@ CadastroPonto() {
     }));
   };
 
-  const handleSubmit = async () => {
-    if (
-      !form.nome ||
-      !form.endereco ||
-      !form.tipo ||
-      !form.numero ||
-      !horarios.inicio ||
-      !horarios.fim
-    ) {
+ const handleSubmit = async () => {
+  if (
+    !form.nome ||
+    !form.endereco ||
+    !form.tipo ||
+    !form.numero ||
+    !horarios.inicio ||
+    !horarios.fim
+  ) {
+    setSnackbar({
+      open: true,
+      message: "Preencha todos os campos obrigatórios!",
+      severity: "error",
+    });
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    setSnackbar({
+      open: true,
+      message: "Sessão expirada. Faça login novamente.",
+      severity: "error",
+    });
+    return;
+  }
+
+  const dataToSend = {
+    ...form,
+    cidade: "Ubá",
+    estado: "MG",
+    horario: `${horarios.inicio} às ${horarios.fim}`,
+  };
+
+  try {
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/pontos`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token, // 🔐 AQUI ESTÁ A DIFERENÇA
+        },
+        body: JSON.stringify(dataToSend),
+      }
+    );
+
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem("token");
       setSnackbar({
         open: true,
-        message: "Preencha todos os campos obrigatórios!",
+        message: "Sessão inválida. Faça login novamente.",
         severity: "error",
       });
       return;
     }
 
-    const dataToSend = {
-      ...form,
-      cidade: "Ubá",
-      estado: "MG",
-      horario: `${horarios.inicio} às ${horarios.fim}`,
-    };
+    if (!res.ok) throw new Error();
 
-    try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/pontos`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dataToSend),
-        }
-      );
+    setSnackbar({
+      open: true,
+      message: "Ponto cadastrado com sucesso!",
+      severity: "success",
+    });
 
-      if (!res.ok) throw new Error();
+    setForm({
+      nome: "",
+      endereco: "",
+      tipo: "",
+      numero: "",
+      bairro: "",
+      cep: "",
+      telefone: "",
+      itens_recebidos: [],
+    });
 
-      setSnackbar({
-        open: true,
-        message: "Ponto cadastrado com sucesso!",
-        severity: "success",
-      });
+    setHorarios({ inicio: "", fim: "" });
 
-      setForm({
-        nome: "",
-        endereco: "",
-        tipo:"",
-        numero: "",
-        bairro: "",
-        cep: "",
-        telefone: "",
-        itens_recebidos: [],
-      });
-
-      setHorarios({ inicio: "", fim: "" });
-    } catch {
-      setSnackbar({
-        open: true,
-        message: "Erro ao cadastrar ponto",
-        severity: "error",
-      });
-    }
-  };
+  } catch {
+    setSnackbar({
+      open: true,
+      message: "Erro ao cadastrar ponto",
+      severity: "error",
+    });
+  }
+};
 
   return (
     <Box
