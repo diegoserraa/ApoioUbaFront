@@ -19,9 +19,20 @@ const criarIcone = (cor) =>
 const Features = ({ pontos = [], cor }) => {
   if (!pontos.length) return null;
 
+  // 🔥 Filtra apenas pontos válidos
+  const pontosValidos = pontos.filter(
+    (p) =>
+      p.latitude &&
+      p.longitude &&
+      !isNaN(parseFloat(p.latitude)) &&
+      !isNaN(parseFloat(p.longitude))
+  );
+
+  if (!pontosValidos.length) return null; // evita quebrar mapa
+
   const center = [
-    parseFloat(pontos[0].latitude),
-    parseFloat(pontos[0].longitude),
+    parseFloat(pontosValidos[0].latitude),
+    parseFloat(pontosValidos[0].longitude),
   ];
 
   return (
@@ -53,7 +64,7 @@ const Features = ({ pontos = [], cor }) => {
             attribution="&copy; OpenStreetMap contributors"
           />
 
-          {pontos.map((ponto) => (
+          {pontosValidos.map((ponto) => (
             <Marker
               key={ponto.id}
               position={[

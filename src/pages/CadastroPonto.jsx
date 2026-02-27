@@ -55,10 +55,19 @@ CadastroPonto() {
     "Produtos de limpeza",
   ];
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+ const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  setForm((prev) => ({
+    ...prev,
+    [name]: value,
+    // 🔥 limpa os itens se não for doação
+    itens_recebidos:
+      name === "tipo" && value !== "doacao"
+        ? []
+        : prev.itens_recebidos,
+  }));
+};
 
   const handleChipClick = (item) => {
     setForm((prev) => ({
@@ -155,12 +164,12 @@ CadastroPonto() {
         }}
       >
         <Typography variant="h5" fontWeight={700} mb={3} align="center">
-          Cadastro de Ponto de Coleta
+          Cadastros
         </Typography>
 
 <TextField
   fullWidth
-  label="Tipo"
+  
   name="tipo"
   value={form.tipo}
   onChange={handleChange}
@@ -169,7 +178,7 @@ CadastroPonto() {
   SelectProps={{ native: true }}
   sx={{ mb: 2 }}
 >
-  
+  <option value="">Selecione a categoria</option>
   <option value="doacao">Ponto de Doação</option>
   <option value="abrigo">Abrigo</option>
   <option value="comida">Alimentação</option>
@@ -300,33 +309,39 @@ CadastroPonto() {
 
         <Divider sx={{ mb: 3 }} />
 
-        <Box mb={3}>
-          <Typography variant="subtitle2" fontWeight={600} mb={2}>
-            Itens recebidos
-          </Typography>
+       {form.tipo === "doacao" && (
+  <Box mb={3}>
+    <Typography variant="subtitle2" fontWeight={600} mb={2}>
+      Itens recebidos
+    </Typography>
 
-          <Stack direction={isSmall ? "column" : "row"} spacing={1.5} flexWrap="wrap">
-            {itensPossiveis.map((item) => {
-              const selected = form.itens_recebidos.includes(item);
+    <Stack
+      direction={isSmall ? "column" : "row"}
+      spacing={1.5}
+      flexWrap="wrap"
+    >
+      {itensPossiveis.map((item) => {
+        const selected = form.itens_recebidos.includes(item);
 
-              return (
-                <Chip
-                  key={item}
-                  label={item}
-                  clickable
-                  onClick={() => handleChipClick(item)}
-                  sx={{
-                    width: isSmall ? "100%" : "auto",
-                    bgcolor: selected ? "#000" : "#fff",
-                    color: selected ? "#fff" : "#000",
-                    border: "1px solid #000",
-                    fontWeight: selected ? 600 : 500,
-                  }}
-                />
-              );
-            })}
-          </Stack>
-        </Box>
+        return (
+          <Chip
+            key={item}
+            label={item}
+            clickable
+            onClick={() => handleChipClick(item)}
+            sx={{
+              width: isSmall ? "100%" : "auto",
+              bgcolor: selected ? "#000" : "#fff",
+              color: selected ? "#fff" : "#000",
+              border: "1px solid #000",
+              fontWeight: selected ? 600 : 500,
+            }}
+          />
+        );
+      })}
+    </Stack>
+  </Box>
+)}
 
         <Button
           variant="contained"
