@@ -59,7 +59,7 @@ const SupportNumbers = ({ onChange }) => {
 
       // Sobe só um pouco (ajuste aqui se quiser mais ou menos)
       window.scrollTo({
-        top: topPosition - 90,
+        top: topPosition,
         behavior: "smooth",
       });
     }
