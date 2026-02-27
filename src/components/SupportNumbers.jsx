@@ -1,9 +1,15 @@
-import React, { useState } from "react";
-import { Box, Grid, Typography, Paper } from "@mui/material";
+import React, { useState, useRef } from "react";
+import {
+  Box,
+  Grid,
+  Typography,
+  Paper,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import RestaurantIcon from "@mui/icons-material/Restaurant";
 import HomeIcon from "@mui/icons-material/Home";
-
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
 const opcoes = [
@@ -35,15 +41,39 @@ const opcoes = [
 
 const SupportNumbers = ({ onChange }) => {
   const [selecionado, setSelecionado] = useState(opcoes[0].nome);
+  const containerRef = useRef(null);
+
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleSelect = (item) => {
     setSelecionado(item.nome);
-    console.log("Tipo selecionado:", item.tipo); // 👈 TESTE AQUI
+
     if (onChange) onChange(item.tipo);
+
+    // 👇 Só executa em tela pequena
+    if (isSmall && containerRef.current) {
+      const topPosition =
+        containerRef.current.getBoundingClientRect().top +
+        window.pageYOffset;
+
+      // Sobe só um pouco (ajuste aqui se quiser mais ou menos)
+      window.scrollTo({
+        top: topPosition - 90,
+        behavior: "smooth",
+      });
+    }
   };
 
   return (
-    <Box sx={{ py: 2, width: "100%", backgroundColor: "#e3f2fd" }}>
+    <Box
+      ref={containerRef}
+      sx={{
+        py: 2,
+        width: "100%",
+        backgroundColor: "#e3f2fd",
+      }}
+    >
       <Typography
         variant="subtitle1"
         align="center"
@@ -111,7 +141,6 @@ const SupportNumbers = ({ onChange }) => {
                     mb: 1,
                     color: "#fff",
                     fontSize: 26,
-                    flexShrink: 0,
                   }}
                 >
                   <IconComponent fontSize="inherit" />
