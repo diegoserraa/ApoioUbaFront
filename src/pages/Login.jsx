@@ -1,9 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
+import {
+  Email,
+  Lock,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 
 function Login() {
-  const [user, setUser] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -15,13 +32,14 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/pontos/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ user, password }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await response.json();
 
@@ -30,8 +48,7 @@ function Login() {
       }
 
       localStorage.setItem("token", data.token);
-      navigate("/cadastroponto");
-
+      navigate("/dashboard");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -40,90 +57,123 @@ function Login() {
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.title}>Painel Administrativo</h2>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "linear-gradient(135deg, #1e3c72, #2a5298)",
+        px: 2,
+      }}
+    >
+      <Paper
+        elevation={10}
+        sx={{
+          p: 5,
+          width: "100%",
+          maxWidth: 420,
+          borderRadius: 4,
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          textAlign="center"
+          mb={1}
+        >
+          Painel Administrativo
+        </Typography>
 
-        <form onSubmit={handleLogin} style={styles.form}>
-          <input
-            type="text"
-            placeholder="Usuário"
-            value={user}
-            onChange={(e) => setUser(e.target.value)}
-            style={styles.input}
+        <Typography
+          variant="body2"
+          textAlign="center"
+          color="text.secondary"
+          mb={4}
+        >
+          Faça login para continuar
+        </Typography>
+
+        <form onSubmit={handleLogin}>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="E-mail"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Email />
+                </InputAdornment>
+              ),
+            }}
           />
 
-          <input
-            type="password"
-            placeholder="Senha"
+          <TextField
+            fullWidth
+            margin="normal"
+            label="Senha"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
             required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
 
-          {error && <div style={styles.error}>{error}</div>}
+          {error && (
+            <Typography
+              color="error"
+              variant="body2"
+              textAlign="center"
+              mt={1}
+            >
+              {error}
+            </Typography>
+          )}
 
-          <button type="submit" style={styles.button} disabled={loading}>
-            {loading ? "Entrando..." : "Entrar"}
-          </button>
+          <Button
+            fullWidth
+            variant="contained"
+            size="large"
+            type="submit"
+            disabled={loading}
+            sx={{
+              mt: 3,
+              py: 1.5,
+              borderRadius: 3,
+              fontWeight: 600,
+              background: "linear-gradient(135deg, #00c6ff, #0072ff)",
+              transition: "0.3s",
+              "&:hover": {
+                background: "linear-gradient(135deg, #0096ff, #005edb)",
+              },
+            }}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Entrar"}
+          </Button>
         </form>
-      </div>
-    </div>
+      </Paper>
+    </Box>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "linear-gradient(135deg, #1e3c72, #2a5298)",
-    padding: "20px",
-  },
-  card: {
-    background: "#ffffff",
-    padding: "40px",
-    borderRadius: "12px",
-    width: "100%",
-    maxWidth: "400px",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: "25px",
-    color: "#333",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "15px",
-  },
-  input: {
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    fontSize: "16px",
-    outline: "none",
-  },
-  button: {
-    padding: "12px",
-    borderRadius: "8px",
-    border: "none",
-    backgroundColor: "#1e3c72",
-    color: "#fff",
-    fontSize: "16px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "0.3s",
-  },
-  error: {
-    color: "red",
-    fontSize: "14px",
-    textAlign: "center",
-  },
-};
 
 export default Login;

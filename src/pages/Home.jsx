@@ -12,6 +12,8 @@ import Footer from "../components/Footer";
 import SupportCards from "../components/SupportCards";
 import SupportNumbers from "../components/SupportNumbers";
 import EmergencyBar from "../components/EmergencyBar";
+import PedidoEntrega from "../components/PedidoEntrega"; // 🔥 NOVO IMPORT
+import { apiFetch } from "../services/api";
 
 const coresPorTipo = {
   comida: {
@@ -41,39 +43,42 @@ function Home() {
   const [tipo, setTipo] = useState("doacao");
   const [pontos, setPontos] = useState([]);
 
-  useEffect(() => {
-    const fetchPontos = async () => {
-      try {
-        setLoading(true);
+useEffect(() => {
+  const fetchPontos = async () => {
+    try {
+      setLoading(true);
 
-        // 🔥 Normaliza o tipo (resolve problema de maiúscula)
-        const tipoNormalizado = tipo?.toLowerCase().trim();
+      const tipoNormalizado = tipo?.toLowerCase().trim();
 
-        console.log("Buscando tipo:", tipoNormalizado);
-
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/pontos?tipo=${tipoNormalizado}`
-        );
-
-        if (!res.ok) throw new Error("Erro na API");
-
-        const data = await res.json();
-
-        console.log("Recebido:", data);
-
-        setPontos(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error(error);
+      // 🔥 Se for entrega, não precisa buscar pontos
+      if (tipoNormalizado === "entrega") {
         setPontos([]);
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchPontos();
-  }, [tipo]);
+      const res = await apiFetch(
+        `/pontos?tipo=${encodeURIComponent(tipoNormalizado)}`
+      );
 
-  // 🔥 Cor sempre garantida (nunca undefined)
+      if (!res.ok) {
+        throw new Error("Erro ao buscar pontos");
+      }
+
+      const data = await res.json();
+
+      setPontos(Array.isArray(data) ? data : []);
+
+    } catch (error) {
+      console.error("Erro ao buscar pontos:", error);
+      setPontos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchPontos();
+}, [tipo]);
+
   const corAtual =
     coresPorTipo[tipo?.toLowerCase().trim()] || coresPorTipo.doacao;
 
@@ -83,14 +88,16 @@ function Home() {
       <Hero />
       <EmergencyBar />
 
-      {/* 🔥 força sempre minúsculo */}
       <SupportNumbers
         onChange={(novoTipo) =>
           setTipo(novoTipo?.toLowerCase().trim())
         }
       />
 
-      {loading ? (
+      {/* 🔥 SE FOR ENTREGA MOSTRA SÓ O FORM */}
+      {tipo === "entrega" ? (
+        <PedidoEntrega />
+      ) : loading ? (
         <Box display="flex" justifyContent="center" mt={4}>
           <CircularProgress />
         </Box>
